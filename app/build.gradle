@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.octopusapp'
+    namespace 'org.ruizlab.phoni.octopusapp'
     compileSdk 31
 
     defaultConfig {
-        applicationId "com.example.octopusapp"
+        applicationId "org.ruizlab.phoni.octopusapp"
         minSdk 28
         targetSdk 31
         versionCode 1
