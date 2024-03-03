@@ -1,6 +1,10 @@
 package org.ruizlab.phoni.octopusapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Data;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -18,8 +22,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        String argumentsOct[] = { "d:octopus-data/megares_database_v3.00_OCTOPUSdb_Android", "f:simulmix.fastq"};
 
+        clearInternalStorage();
         Log.i("info","Copy files from external storage to internal storage");
 
         File dataSource = new File(getExternalFilesDir(null)+"/database");
@@ -27,22 +31,34 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < dataSource.listFiles().length; i++) {
             copyDBToInternalStorage(new File(dataSource, children[i]), children[i]);
         }
-        copyDBToInternalStorage(new File(getExternalFilesDir(null)+"/simulmix.fastq"), "simulmix.fastq" );
-//        copyDBToInternalStorage( "int42.db");
-//        copyDBToInternalStorage( "int66.db");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","int69.db");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","int77.db");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","blo42.bl");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","blo66.bl");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","blo69.bl");
-//        copyDBToInternalStorage( "octopus-data/megares_database_v3.00_OCTOPUSdb_Android","blo77.bl");
-        //copyDBToInternalStorage( "octopus-data","simulmix.fastq");
+        dataSource = new File(getExternalFilesDir(null)+"");
+        File[] childFiles = dataSource.listFiles();
+        for (int i = 0; i < childFiles.length; i++) {
+            if (childFiles[i].isFile() && childFiles[i].getName().endsWith(".fastq"))
+                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
+        }
 
         Log.i("info","Files copied");
         listFilesInInternalStorage();
 
+        System.gc();
+        WorkRequest octopusWorkRequest, analyticsWorkRequest;
+        WorkManager workManager = WorkManager.getInstance(getApplicationContext());
+
         try {
-            Octopus.initialize(this, argumentsOct);
+
+
+            octopusWorkRequest = new OneTimeWorkRequest.Builder(Octopus.class).build();
+            workManager.enqueue(octopusWorkRequest);
+            System.out.println("OCTOPUS STARTING");
+            if(((Global)getApplicationContext()).analyticsAreEnabled())
+            {
+                analyticsWorkRequest = new OneTimeWorkRequest.Builder(ForegroundAnalytics.class)
+                        .build();
+                workManager.enqueue(analyticsWorkRequest);
+                System.out.println("ANALYTICS STARTING");
+            }
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -53,8 +69,6 @@ public class MainActivity extends AppCompatActivity {
 
         InputStream is = null;
         try {
-//            is = getAssets().open(path+"/"+filename);
-
             is = new FileInputStream(file);
             String outputPath = getFilesDir() + "/" + filename;
             OutputStream os = new FileOutputStream(outputPath);
@@ -83,8 +97,22 @@ public class MainActivity extends AppCompatActivity {
             for (File file : files) {
                 // Log the file name or do something with the file
                 Log.d("InternalStorage", "File: " + file.getName());
+
             }
         }
     }
 
+    private void clearInternalStorage() {
+        // Get the internal storage directory
+        File directory = getFilesDir();
+
+        // List all files in the directory
+        File[] files = directory.listFiles();
+
+        if (files != null) {
+            for (File file : files) {
+                file.delete();
+            }
+        }
+    }
 }

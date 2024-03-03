@@ -9,8 +9,19 @@ javac -cp ".;octopus_android_jars/*" OCTOPUS_Android.java
 
 //Note : OCTOPUS_Android was renamed to Octopus
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.net.Uri;
+import android.os.SystemClock;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.work.ForegroundInfo;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
 
 import java.io.*;
 import java.io.File;
@@ -73,6 +84,7 @@ class Tentacle_Android extends Thread
                 while(fwd_hashes.size()>0)
                 {
                     long ah = fwd_hashes.pollFirst();
+//                    Log.d("debug","value of ah : "+ah);
                     if (ah>=0)
                     {
                         Integer h = storeT.lookUpKmerSpecies(ah);
@@ -310,8 +322,10 @@ class KmerMetaDataBase_Android
         byte[] lb = ByteBuffer.allocate(8).putLong(ah).array();
         for (int i=0; i<seeds.length; i++)
         {
+//            Log.d("debug","index i "+i+" lb "+Arrays.toString(lb));
             if (bf[i].contains(lb))
             {
+//                Log.d("debug","condition true ");
                 int mh = MurmurHash.hash(lb,seeds[i]);
                 spp = m[i].get(mh);
                 if (spp!=null) {return spp;}
@@ -322,7 +336,72 @@ class KmerMetaDataBase_Android
     }
 }
 
-public class Octopus {
+public class Octopus extends Worker{
+
+    public Octopus(
+            @NonNull Context context,
+            @NonNull WorkerParameters params) {
+        super(context, params);
+    }
+    @NonNull
+    @Override
+    public Result doWork() {
+        setForegroundAsync(createForegroundInfo());
+        try {
+            ((Global)this.getApplicationContext()).setCpuTime(SystemClock.currentThreadTimeMillis());
+            ((Global)this.getApplicationContext()).mapperStarts();
+            System.out.println("Octopus STARTED");
+            String argumentsOct[] = { "d:octopus-data/megares_database_v3.00_OCTOPUSdb_Android", "f:simulmix.fastq"};
+            initialize((Global)this.getApplicationContext(), argumentsOct);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Indicate whether the work finished successfully with the Result
+        ((Global)this.getApplicationContext()).setCpuTime(SystemClock.currentThreadTimeMillis());
+        ((Global)this.getApplicationContext()).mapperStops();
+        System.out.println("Octopus FINISHED");
+        return Result.success();
+    }
+
+    @NonNull
+    private ForegroundInfo createForegroundInfo() {
+
+        Context context = getApplicationContext();
+        String id = "1";
+        String title = "Octopus";
+
+        /*
+        String cancel = context.getString(R.string.cancel_download);
+        // This PendingIntent can be used to cancel the worker
+        PendingIntent intent = WorkManager.getInstance(context)
+                .createCancelPendingIntent(getId());
+         */
+
+        createChannel(id);
+
+        Notification notification = new NotificationCompat.Builder(context,id)
+                .setContentTitle(title)
+                .setTicker(title)
+                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                //.setSmallIcon(R.drawable.ic_work_notification)
+                .setOngoing(true)
+                // Add the cancel action to the notification which can
+                // be used to cancel the worker
+                //.addAction(android.R.drawable.ic_delete, cancel, intent)
+                .build();
+        return new ForegroundInfo(Integer.parseInt(id),notification);
+    }
+
+    private void createChannel(String id) {
+        CharSequence name = "OctopusApp - Octopus";
+        String description = "Octopus";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(id, name, importance);
+        channel.setDescription(description);
+        NotificationManager notificationManager = getApplicationContext().getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+    }
     public static long fastModulo(long dividend, long divisor)
     {
         if (((divisor-1) & divisor) == 0) {return (dividend & (divisor - 1));}
@@ -516,8 +595,8 @@ public class Octopus {
         String ukmdb = "";
         String outfilename="";
         int cores = Runtime.getRuntime().availableProcessors()-1;
-        double pval_or_minfreq = 0.75d;
         int hll_log2m = 14;
+        double pval_or_minfreq = 0.75d;
         String line;
 
         for (int t=0; t<args.length; t++)
@@ -563,11 +642,11 @@ public class Octopus {
         long hllramused = (long)nspecies*estimator.getBytes().length;
         System.gc();
         usedram = (float)(Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
-        Log.d("debug","If condition value of (usedram+hllramused)/allram is greater than 0.8? " + (usedram+hllramused)/allram);
-        if ((double)(usedram+hllramused)/allram>0.8)
+        Log.d("debug","If condition value of (usedram+hllramused)/allram is greater than 0.8? " + (usedram+hllramused)/allram + " | hllramused = "+hllramused + " | usedram = "+ usedram);
+        if ((double)(usedram+hllramused)/allram>0.9)
         {
-            Log.d("debug","if condition true");
-            while((double)(usedram+hllramused)/allram>0.8)
+//            Log.d("debug","if condition true");
+            while((double)(usedram+hllramused)/allram>0.9)
             {
                 hll_log2m = hll_log2m-1;
                 Log.d("debug","hll_log2m value = "+hll_log2m);
@@ -609,7 +688,7 @@ public class Octopus {
 
         BufferedReader r = new BufferedReader(new FileReader(new File(context.getFilesDir(), readfile).getAbsolutePath()),DEFAULT_BUFFER_SIZE);
 
-        //anisha : check below case!
+
         if (readfile.endsWith(".gz")) {r=new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(readfile),DEFAULT_BUFFER_SIZE)),DEFAULT_BUFFER_SIZE);}
         long i=0;
         long mapped=0;
@@ -718,4 +797,6 @@ public class Octopus {
         elapsedTime = System.currentTimeMillis() - timeZero;
         Log.i("info","Total time employed: "+elapsedTime/1000+" seconds");
     }
+
+
 }

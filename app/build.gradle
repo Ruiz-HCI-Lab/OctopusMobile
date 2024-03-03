@@ -45,4 +45,8 @@ dependencies {
     implementation 'com.h2database:h2-mvstore:2.2.224'
 
     implementation files('libs/greplin-bloom-filter-master.jar')
+
+    // Jetpack WorkManager for foreground tasks
+    def work_version = "2.7.1"
+    implementation "androidx.work:work-runtime:$work_version"
 }
