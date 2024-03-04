@@ -1,13 +1,11 @@
-package org.ruizlab.phoni.octopusapp;
-/*
-del *.class
-javac -cp ".;octopus_android_jars/*" OCTOPUS_Android.java
- java -cp ".;octopus_android_jars/*" OCTOPUS_Android d:who_priority_bacteria_OCTOPUSdb_Android f:..\simulmix.fastq
- java -cp ".;octopus_android_jars/*" OCTOPUS_Android d:viral.1.1.genomic_OCTOPUSdb_Android f:..\simulmix.fastq s:0.75
- java -cp ".;octopus_android_jars/*" OCTOPUS_Android d:megares_database_v3.00_OCTOPUSdb_Android f:..\simulmix.fastq t:16
-*/
+// -----------------------------------------------------------------------
+// <copyright file="ForegroundAnalytics.java" company="Ruiz HCI Lab">
+// Copyright (c) Ruiz HCI Lab. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the repository root for full license information.
+// </copyright>
+// -----------------------------------------------------------------------
 
-//Note : OCTOPUS_Android was renamed to Octopus
+package org.ruizlab.phoni.octopusapp;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
