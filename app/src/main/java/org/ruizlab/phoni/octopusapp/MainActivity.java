@@ -8,13 +8,16 @@
 package org.ruizlab.phoni.octopusapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.work.Data;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
 import androidx.work.WorkRequest;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -49,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
         listFilesInInternalStorage();
 
         System.gc();
-        WorkRequest octopusWorkRequest, analyticsWorkRequest;
+        WorkRequest octopusWorkRequest, analyticsWorkRequest = null;
         WorkManager workManager = WorkManager.getInstance(getApplicationContext());
 
         try {
@@ -64,6 +67,20 @@ public class MainActivity extends AppCompatActivity {
                         .build();
                 workManager.enqueue(analyticsWorkRequest);
                 System.out.println("ANALYTICS STARTING");
+            }
+            workManager.getWorkInfoByIdLiveData(octopusWorkRequest.getId())
+                    .observe((LifecycleOwner) this, workInfo -> {
+                        if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                            Toast.makeText(getApplicationContext(),"CSV Created!", Toast.LENGTH_LONG).show();
+                        }
+                    });
+            if(analyticsWorkRequest!=null) {
+                workManager.getWorkInfoByIdLiveData(analyticsWorkRequest.getId())
+                        .observe((LifecycleOwner) this, workInfo -> {
+                            if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
+                                Toast.makeText(getApplicationContext(), "ANALYTICS DONE!", Toast.LENGTH_SHORT).show();
+                            }
+                        });
             }
 
         } catch (Exception e) {

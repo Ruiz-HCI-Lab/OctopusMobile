@@ -64,12 +64,7 @@ public class ForegroundAnalytics extends Worker{
         */
 
         try {
-            /*
-            while(!((Global) this.getApplicationContext()).mapperIsRunning())
-            {
-                Thread.sleep(100);
-            }
-            */
+
             System.out.println("ANALYTICS STARTED");
             String fileLocation = getApplicationContext().getExternalFilesDir(null) + "/" + ((Global)this.getApplicationContext()).getSequenceFilename() + "_Analytics.csv";
             FileWriter fileWriter = new FileWriter(fileLocation);
@@ -163,7 +158,7 @@ public class ForegroundAnalytics extends Worker{
     }
 
     private void createChannel(String id) {
-        CharSequence name = "KargaMobile - Analytics";
+        CharSequence name = "OctopusApp - Analytics";
         String description = "Analytics Process";
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(id, name, importance);
