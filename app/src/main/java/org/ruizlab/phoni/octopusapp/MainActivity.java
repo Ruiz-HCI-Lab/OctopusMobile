@@ -19,6 +19,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.json.JSONObject;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -34,19 +36,30 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         clearInternalStorage();
+
+        String configurations = loadConfig();
+
+        try {
+        JSONObject config = new JSONObject(configurations);
+        String databaseName = config.getString("databaseName");
+        String fastqFileName = config.getString("fastqFileName");
+
         Log.i("info","Copy files from external storage to internal storage");
 
-        File dataSource = new File(getExternalFilesDir(null)+"/database");
+        File dataSource = new File(getExternalFilesDir(null)+"/"+ databaseName);
         String[] children = dataSource.list();
         for (int i = 0; i < dataSource.listFiles().length; i++) {
             copyDBToInternalStorage(new File(dataSource, children[i]), children[i]);
         }
-        dataSource = new File(getExternalFilesDir(null)+"");
-        File[] childFiles = dataSource.listFiles();
-        for (int i = 0; i < childFiles.length; i++) {
-            if (childFiles[i].isFile() && childFiles[i].getName().endsWith(".fastq"))
-                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
-        }
+        File fastqSource = new File(getExternalFilesDir(null)+"/"+fastqFileName);
+        if(fastqSource.isFile())
+            copyDBToInternalStorage(fastqSource, "simulmix.fastq" );
+//        dataSource = new File(getExternalFilesDir(null)+"");
+//        File[] childFiles = dataSource.listFiles();
+//        for (int i = 0; i < childFiles.length; i++) {
+//            if (childFiles[i].isFile() && childFiles[i].getName().equals())
+//                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
+//        }
 
         Log.i("info","Files copied");
         listFilesInInternalStorage();
@@ -55,8 +68,12 @@ public class MainActivity extends AppCompatActivity {
         WorkRequest octopusWorkRequest, analyticsWorkRequest = null;
         WorkManager workManager = WorkManager.getInstance(getApplicationContext());
 
-        try {
 
+
+//            Data myParameters = new Data.Builder()
+//                    .putString(Octopus.KEY_SOURCE,sourceFileUri.toString())
+//                    .putString(Octopus.KEY_DATA,dataBaseFileUri.toString())
+//                    .build();
 
             octopusWorkRequest = new OneTimeWorkRequest.Builder(Octopus.class).build();
             workManager.enqueue(octopusWorkRequest);
@@ -138,5 +155,21 @@ public class MainActivity extends AppCompatActivity {
                 file.delete();
             }
         }
+    }
+
+    private String loadConfig(){
+        String json = null;
+        try {
+            InputStream is = getAssets().open("config.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
     }
 }
