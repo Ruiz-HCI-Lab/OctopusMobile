@@ -40,46 +40,47 @@ public class MainActivity extends AppCompatActivity {
         String configurations = loadConfig();
 
         try {
-        JSONObject config = new JSONObject(configurations);
-        String databaseName = config.getString("databaseName");
-        String fastqFileName = config.getString("fastqFileName");
+            JSONObject config = new JSONObject(configurations);
+            String databaseName = config.getString("databaseName");
+            String fastqFileName = config.getString("fastqFileName");
 
-        Log.i("info","Copy files from external storage to internal storage");
+            Log.i("info","Copy files from external storage to internal storage");
 
-        File dataSource = new File(getExternalFilesDir(null)+"/"+ databaseName);
-        String[] children = dataSource.list();
-        for (int i = 0; i < dataSource.listFiles().length; i++) {
-            copyDBToInternalStorage(new File(dataSource, children[i]), children[i]);
-        }
-        File fastqSource = new File(getExternalFilesDir(null)+"/"+fastqFileName);
-        if(fastqSource.isFile())
-            copyDBToInternalStorage(fastqSource, "simulmix.fastq" );
-//        dataSource = new File(getExternalFilesDir(null)+"");
-//        File[] childFiles = dataSource.listFiles();
-//        for (int i = 0; i < childFiles.length; i++) {
-//            if (childFiles[i].isFile() && childFiles[i].getName().equals())
-//                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
-//        }
+            File dataSource = new File(getExternalFilesDir(null)+"/"+ databaseName);
+            String[] children = dataSource.list();
+            for (int i = 0; i < dataSource.listFiles().length; i++) {
+                copyDBToInternalStorage(new File(dataSource, children[i]), children[i]);
+            }
+            File fastqSource = new File(getExternalFilesDir(null)+"/"+fastqFileName);
+            if(fastqSource.isFile())
+                copyDBToInternalStorage(fastqSource, fastqFileName );
+    //        dataSource = new File(getExternalFilesDir(null)+"");
+    //        File[] childFiles = dataSource.listFiles();
+    //        for (int i = 0; i < childFiles.length; i++) {
+    //            if (childFiles[i].isFile() && childFiles[i].getName().equals())
+    //                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
+    //        }
 
-        Log.i("info","Files copied");
-        listFilesInInternalStorage();
+            Log.i("info","Files copied");
+            listFilesInInternalStorage();
 
-        System.gc();
-        WorkRequest octopusWorkRequest, analyticsWorkRequest = null;
-        WorkManager workManager = WorkManager.getInstance(getApplicationContext());
+            System.gc();
+            WorkRequest octopusWorkRequest, analyticsWorkRequest = null;
+            WorkManager workManager = WorkManager.getInstance(getApplicationContext());
 
 
 
-//            Data myParameters = new Data.Builder()
-//                    .putString(Octopus.KEY_SOURCE,sourceFileUri.toString())
-//                    .putString(Octopus.KEY_DATA,dataBaseFileUri.toString())
-//                    .build();
+            Data myParameters = new Data.Builder()
+                    .putStringArray(Octopus.KEY_ARGS, new String[]{"d:" + databaseName, "f:" + fastqFileName})
+                    .build();
 
-            octopusWorkRequest = new OneTimeWorkRequest.Builder(Octopus.class).build();
+            octopusWorkRequest = new OneTimeWorkRequest.Builder(Octopus.class).setInputData(myParameters).build();
             workManager.enqueue(octopusWorkRequest);
             System.out.println("OCTOPUS STARTING");
             if(((Global)getApplicationContext()).analyticsAreEnabled())
             {
+                ((Global)this.getApplicationContext()).setSequenceFilename(fastqFileName);
+                ((Global)this.getApplicationContext()).setReferenceFilename(databaseName);
                 analyticsWorkRequest = new OneTimeWorkRequest.Builder(ForegroundAnalytics.class)
                         .build();
                 workManager.enqueue(analyticsWorkRequest);

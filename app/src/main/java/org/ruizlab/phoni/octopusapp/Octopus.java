@@ -336,6 +336,8 @@ class KmerMetaDataBase_Android
 
 public class Octopus extends Worker{
 
+    public static final String KEY_ARGS = "ARGS";
+
     public Octopus(
             @NonNull Context context,
             @NonNull WorkerParameters params) {
@@ -349,8 +351,8 @@ public class Octopus extends Worker{
             ((Global)this.getApplicationContext()).setCpuTime(SystemClock.currentThreadTimeMillis());
             ((Global)this.getApplicationContext()).mapperStarts();
             System.out.println("Octopus STARTED");
-            String argumentsOct[] = { "d:octopus-data/megares_database_v3.00_OCTOPUSdb_Android", "f:simulmix.fastq"};
-            initialize((Global)this.getApplicationContext(), argumentsOct);
+            //String argumentsOct[] = { "d:octopus-data/megares_database_v3.00_OCTOPUSdb_Android", "f:simulmix.fastq"};
+            initialize((Global)this.getApplicationContext(), getInputData().getStringArray(KEY_ARGS));
         } catch (Exception e) {
             e.printStackTrace();
         }
