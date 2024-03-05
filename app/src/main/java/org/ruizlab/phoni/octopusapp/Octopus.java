@@ -689,7 +689,7 @@ public class Octopus extends Worker{
         BufferedReader r = new BufferedReader(new FileReader(new File(context.getFilesDir(), readfile).getAbsolutePath()),DEFAULT_BUFFER_SIZE);
 
 
-        if (readfile.endsWith(".gz")) {r=new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(readfile),DEFAULT_BUFFER_SIZE)),DEFAULT_BUFFER_SIZE);}
+        if (readfile.endsWith(".gz")) {r=new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(new File(context.getFilesDir(), readfile).getAbsolutePath()),DEFAULT_BUFFER_SIZE)),DEFAULT_BUFFER_SIZE);}
         long i=0;
         long mapped=0;
         ConcurrentLinkedQueue<ClassificationResult_Android> results = new ConcurrentLinkedQueue();
