@@ -17,6 +17,10 @@ import androidx.work.WorkRequest;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import org.json.JSONObject;
@@ -37,29 +41,123 @@ public class MainActivity extends AppCompatActivity {
 
         clearInternalStorage();
 
-        String configurations = loadConfig();
+        getExternalFilesDir(null); //to create app data storage folder
 
+//        String configurations = loadConfig();
+//        JSONObject config = new JSONObject(configurations);
+//        String databaseName = config.getString("databaseName");
+//        String fastqFileName = config.getString("fastqFileName");
+
+        Button btnStart = findViewById(R.id.btnStart);
+        RadioGroup rgDatabase = findViewById(R.id.rgDatabase);
+        RadioGroup rgFastQ = findViewById(R.id.rgFastQ);
+
+        EditText etCustomDB = findViewById(R.id.etCustomDB);
+        EditText etCustomSeq = findViewById(R.id.etCustomSeq);
+
+        rgDatabase.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbCustomDB) {
+                etCustomDB.setVisibility(View.VISIBLE);
+            } else {
+                etCustomDB.setVisibility(View.GONE);
+            }
+        });
+
+        rgFastQ.setOnCheckedChangeListener((group, checkedId) -> {
+            if (checkedId == R.id.rbCustomSeq) {
+                etCustomSeq.setVisibility(View.VISIBLE);
+            } else {
+                etCustomSeq.setVisibility(View.GONE);
+            }
+        });
+
+
+
+        btnStart.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int selectedDBId = rgDatabase.getCheckedRadioButtonId();
+                String databaseName = getSelectedDBName(selectedDBId);
+
+                int selectedFastQId = rgFastQ.getCheckedRadioButtonId();
+                String fastqFileName = getSelectedFastQName(selectedFastQId);
+
+                if (databaseName.trim().isEmpty() || fastqFileName.trim().isEmpty()) {
+                    Log.e("Error","Empty Database or Sequence Field");
+                    return; // Stop further execution
+                }
+
+                btnStart.setEnabled(false);
+                startAnalysis(databaseName,fastqFileName);
+            }
+        });
+    }
+
+    private String getSelectedDBName(int selectedDBId) {
+        String selectedDB="";
+        if (selectedDBId == R.id.rbDbWHO) {
+            selectedDB = "who_priority_bacteria";
+        } else if (selectedDBId == R.id.rbDbMITO) {
+            selectedDB = "mitochondrion.1.1.genomic";
+        } else if (selectedDBId == R.id.rbDbVIRAL) {
+            selectedDB = "viral.1.1.genomic";
+        } else if (selectedDBId == R.id.rbDbMEGA) {
+            selectedDB = "megares_database_v3.00";
+        } else if (selectedDBId == R.id.rbCustomDB){
+            EditText editText = findViewById(R.id.etCustomDB);
+            selectedDB = editText.getText().toString();
+            if(selectedDB.trim().isEmpty()) {
+                editText.setError("This field cannot be empty");
+                return "";
+            }
+        }
+        else {
+            selectedDB = "megares_database_v3.00"; //default
+        }
+        return selectedDB;
+    }
+
+    private String getSelectedFastQName(int selectedFastQId) {
+        String selectedFile="";
+        if (selectedFastQId == R.id.rbFQ605) {
+            selectedFile = "SRR9687605.fastq";
+        } else if (selectedFastQId == R.id.rbFQ647) {
+            selectedFile = "SRR9687647.fastq";
+        } else if (selectedFastQId == R.id.rbFQ648) {
+            selectedFile = "SRR9687648.fastq";
+        } else if (selectedFastQId == R.id.rbCustomSeq){
+            EditText editText = findViewById(R.id.etCustomSeq);
+            selectedFile = editText.getText().toString();
+            if(selectedFile.trim().isEmpty()) {
+                editText.setError("This field cannot be empty");
+                return "";
+            }
+        }
+        else {
+            selectedFile = "SRR9687605.fastq"; //default
+        }
+        return selectedFile;
+    }
+
+    private void startAnalysis(String databaseName, String fastqFileName) {
         try {
-            JSONObject config = new JSONObject(configurations);
-            String databaseName = config.getString("databaseName");
-            String fastqFileName = config.getString("fastqFileName");
 
             Log.i("info","Copy files from external storage to internal storage");
 
             File dataSource = new File(getExternalFilesDir(null)+"/"+ databaseName);
             String[] children = dataSource.list();
+            if(children==null) { //Error handling
+                Toast.makeText(getApplicationContext(), "Database not found", Toast.LENGTH_SHORT).show();
+                findViewById(R.id.btnStart).setEnabled(true);
+                return;
+            }
             for (int i = 0; i < dataSource.listFiles().length; i++) {
                 copyDBToInternalStorage(new File(dataSource, children[i]), children[i]);
             }
             File fastqSource = new File(getExternalFilesDir(null)+"/"+fastqFileName);
             if(fastqSource.isFile())
                 copyDBToInternalStorage(fastqSource, fastqFileName );
-    //        dataSource = new File(getExternalFilesDir(null)+"");
-    //        File[] childFiles = dataSource.listFiles();
-    //        for (int i = 0; i < childFiles.length; i++) {
-    //            if (childFiles[i].isFile() && childFiles[i].getName().equals())
-    //                copyDBToInternalStorage(childFiles[i], "simulmix.fastq" );
-    //        }
+
 
             Log.i("info","Files copied");
             listFilesInInternalStorage();
@@ -90,6 +188,8 @@ public class MainActivity extends AppCompatActivity {
                     .observe((LifecycleOwner) this, workInfo -> {
                         if (workInfo.getState() == WorkInfo.State.SUCCEEDED) {
                             Toast.makeText(getApplicationContext(),"CSV Created!", Toast.LENGTH_LONG).show();
+                            Button btnStart = findViewById(R.id.btnStart);
+                            btnStart.setEnabled(true);
                         }
                     });
             if(analyticsWorkRequest!=null) {
@@ -125,6 +225,8 @@ public class MainActivity extends AppCompatActivity {
             os.close();
             is.close();
         } catch (IOException e) {
+            Toast.makeText(getApplicationContext(),"File not found", Toast.LENGTH_SHORT).show();
+            findViewById(R.id.btnStart).setEnabled(true);
             throw new RuntimeException(e);
         }
     }

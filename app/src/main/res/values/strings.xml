@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">OctopusApp</string>
+    <string name="str_viral_1_1_genomic">Viral 1.1 Genomic</string>
+    <string name="str_megares_3_0_0">Megares 3.0.0</string>
+    <string name="str_mitochondrion_1_1_genomic">Mitochondrion 1.1 Genomic</string>
+    <string name="str_who_priority_bacteria">WHO Priority Bacteria</string>
+    <string name="str_srr9687605_fastq">SRR9687605.fastq</string>
+    <string name="str_srr9687647_fastq">SRR9687647.fastq</string>
+    <string name="str_srr9687648_fastq">SRR9687648.fastq</string>
+    <string name="start">START</string>
+    <string name="select_database">Select Database</string>
+    <string name="select_sequence_file">Select Sequence File</string>
+    <string name="custom_db">Other Database Name</string>
+    <string name="custom_sequence_file">Custom Sequence File Name</string>
 </resources>
