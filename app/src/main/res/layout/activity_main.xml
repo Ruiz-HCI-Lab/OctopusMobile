@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.145"
+        tools:layout_editor_absoluteX="0dp">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="164dp"
+            android:layout_height="26dp"
+            android:text="@string/select_database"
+            tools:layout_editor_absoluteX="6dp"
+            tools:layout_editor_absoluteY="145dp" />
+
+        <RadioGroup
+            android:id="@+id/rgDatabase"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="45dp"
+            tools:layout_editor_absoluteY="175dp">
+
+            <RadioButton
+                android:id="@+id/rbDbMEGA"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/str_megares_3_0_0" />
+
+            <RadioButton
+                android:id="@+id/rbDbWHO"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_who_priority_bacteria" />
+
+
+            <RadioButton
+                android:id="@+id/rbDbVIRAL"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_viral_1_1_genomic" />
+
+            <RadioButton
+                android:id="@+id/rbDbMITO"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/str_mitochondrion_1_1_genomic" />
+
+
+            <RadioButton
+                android:id="@+id/rbCustomDB"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Other Database" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/etCustomDB"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/custom_db"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+        app:layout_constraintVertical_bias="0.489"
+        tools:layout_editor_absoluteX="0dp">
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/select_sequence_file"
+            tools:layout_editor_absoluteX="7dp"
+            tools:layout_editor_absoluteY="457dp" />
+
+        <RadioGroup
+            android:id="@+id/rgFastQ"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            tools:layout_editor_absoluteX="16dp"
+            tools:layout_editor_absoluteY="486dp">
+
+            <RadioButton
+                android:id="@+id/rbFQ605"
+                android:layout_width="168dp"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="@string/str_srr9687605_fastq" />
+
+            <RadioButton
+                android:id="@+id/rbFQ647"
+                android:layout_width="168dp"
+                android:layout_height="wrap_content"
+                android:text="@string/str_srr9687647_fastq" />
+
+            <RadioButton
+                android:id="@+id/rbFQ648"
+                android:layout_width="168dp"
+                android:layout_height="wrap_content"
+                android:text="@string/str_srr9687648_fastq" />
+
+            <RadioButton
+                android:id="@+id/rbCustomSeq"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Other Sequence File" />
+
+        </RadioGroup>
+
+        <EditText
+            android:id="@+id/etCustomSeq"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:hint="@string/custom_sequence_file"
+            android:inputType="text"
+            android:minHeight="48dp"
+            android:textSize="14sp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnStart"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/start"
+            android:textColor="@color/white"
+            tools:layout_editor_absoluteX="150dp"
+            tools:layout_editor_absoluteY="642dp" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
