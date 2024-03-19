@@ -22,10 +22,17 @@ In the Global class, testing features and analytics can be enabled/disabled.
 
 ## Functionality
 
-<>  
+OctopusMobile implements the original Octopus functionality.
+
+More details can be found at: [Octopus@github](https://github.com/DataIntellSystLab/OCTOPUS)
+  
 Once completed, the system stores a .CSV file with the results in the default app folder (/android/data/org.ruizlab.phoni.octopusapp/).  
  
 When activated, the system executes another foreground thread with analytics, recording total wall/CPU time, max/average RAM, and max/average temperature. Analytics results are stored in a separate .CSV file in the same default app folder.  
+
+## Development Details
+
+Regarding libraries, specific dependencies for the Android application have been manually included, while others are added through Maven. The manually contained library is greplin-bloom-filter-master, and the libraries added through Maven are stream-lib and h2-mvstore. These libraries are essential for successfully porting OCTOPUS to the Android environment, providing the necessary functionality and compatibility for the application to operate effectively on mobile devices.
 
 ## Support
 
